@@ -7,6 +7,7 @@ import { createDebugLogger } from '@aztec/foundation/log';
 import { RunningPromise } from '@aztec/foundation/running-promise';
 import { Timer, elapsed } from '@aztec/foundation/timer';
 import { P2P } from '@aztec/p2p';
+import { Synchronizer } from '@aztec/pxe';
 import { WorldStateStatus, WorldStateSynchronizer } from '@aztec/world-state';
 
 import { GlobalVariableBuilder } from '../global_variable_builder/global_builder.js';
@@ -38,6 +39,8 @@ export class Sequencer {
   private allowedFeePaymentContractClasses: Fr[] = [];
   private allowedFeePaymentContractInstances: AztecAddress[] = [];
 
+  private synchronizer: Synchronizer = {} as Synchronizer;
+
   constructor(
     private publisher: L1Publisher,
     private globalsBuilder: GlobalVariableBuilder,
@@ -53,6 +56,10 @@ export class Sequencer {
   ) {
     this.updateConfig(config);
     this.log(`Initialized sequencer with ${this.minTxsPerBLock}-${this.maxTxsPerBlock} txs per block.`);
+  }
+
+  public updateSynchronizer(synchronizer: Synchronizer) {
+    this.synchronizer = synchronizer;
   }
 
   /**
@@ -255,10 +262,12 @@ export class Sequencer {
   protected async publishL2Block(block: L2Block) {
     // Publishes new block to the network and awaits the tx to be mined
     this.state = SequencerState.PUBLISHING_BLOCK;
-    const publishedL2Block = await this.publisher.processL2Block(block);
+
+    const publishedL2Block = await this.synchronizer.addBlock([block]);
+
     if (publishedL2Block) {
       this.log(`Successfully published block ${block.number}`);
-      this.lastPublishedBlock = block.number;
+      this.lastPublishedBlock++;
     } else {
       throw new Error(`Failed to publish block`);
     }

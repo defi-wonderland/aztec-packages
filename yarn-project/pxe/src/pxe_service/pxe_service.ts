@@ -1,40 +1,6 @@
-import {
-  AuthWitness,
-  AztecNode,
-  EncryptedTxL2Logs,
-  ExtendedNote,
-  FunctionCall,
-  GetUnencryptedLogsResponse,
-  KeyStore,
-  L2Block,
-  LogFilter,
-  MerkleTreeId,
-  NoteFilter,
-  PXE,
-  SimulationError,
-  Tx,
-  TxEffect,
-  TxExecutionRequest,
-  TxHash,
-  TxReceipt,
-  UnencryptedTxL2Logs,
-  isNoirCallStackUnresolved,
-} from '@aztec/circuit-types';
+import { AuthWitness, AztecNode, EncryptedTxL2Logs, ExtendedNote, FunctionCall, GetUnencryptedLogsResponse, KeyStore, L2Block, LogFilter, MerkleTreeId, NoteFilter, PXE, SimulationError, Tx, TxEffect, TxExecutionRequest, TxHash, TxReceipt, UnencryptedTxL2Logs, isNoirCallStackUnresolved } from '@aztec/circuit-types';
 import { TxPXEProcessingStats } from '@aztec/circuit-types/stats';
-import {
-  AztecAddress,
-  CallRequest,
-  CompleteAddress,
-  FunctionData,
-  GrumpkinPrivateKey,
-  MAX_NON_REVERTIBLE_PUBLIC_CALL_STACK_LENGTH_PER_TX,
-  MAX_REVERTIBLE_PUBLIC_CALL_STACK_LENGTH_PER_TX,
-  PartialAddress,
-  PrivateKernelTailCircuitPublicInputs,
-  PublicCallRequest,
-  computeContractClassId,
-  getContractClassFromArtifact,
-} from '@aztec/circuits.js';
+import { AztecAddress, CallRequest, CompleteAddress, FunctionData, GrumpkinPrivateKey, MAX_NON_REVERTIBLE_PUBLIC_CALL_STACK_LENGTH_PER_TX, MAX_REVERTIBLE_PUBLIC_CALL_STACK_LENGTH_PER_TX, PartialAddress, PrivateKernelTailCircuitPublicInputs, PublicCallRequest, computeContractClassId, getContractClassFromArtifact } from '@aztec/circuits.js';
 import { computeCommitmentNonce, siloNullifier } from '@aztec/circuits.js/hash';
 import { ContractArtifact, DecodedReturn, FunctionSelector, encodeArguments } from '@aztec/foundation/abi';
 import { arrayNonEmptyLength, padArrayEnd } from '@aztec/foundation/collection';
@@ -42,16 +8,11 @@ import { Fr } from '@aztec/foundation/fields';
 import { SerialQueue } from '@aztec/foundation/fifo';
 import { DebugLogger, createDebugLogger } from '@aztec/foundation/log';
 import { Timer } from '@aztec/foundation/timer';
-import {
-  AcirSimulator,
-  ExecutionResult,
-  collectEncryptedLogs,
-  collectEnqueuedPublicFunctionCalls,
-  collectUnencryptedLogs,
-  resolveOpcodeLocations,
-} from '@aztec/simulator';
+import { AcirSimulator, ExecutionResult, collectEncryptedLogs, collectEnqueuedPublicFunctionCalls, collectUnencryptedLogs, resolveOpcodeLocations } from '@aztec/simulator';
 import { ContractClassWithId, ContractInstanceWithAddress } from '@aztec/types/contracts';
 import { NodeInfo } from '@aztec/types/interfaces';
+
+
 
 import { PXEServiceConfig, getPackageInfo } from '../config/index.js';
 import { ContractDataOracle } from '../contract_data_oracle/index.js';
@@ -62,11 +23,12 @@ import { KernelProver } from '../kernel_prover/kernel_prover.js';
 import { getAcirSimulator } from '../simulator/index.js';
 import { Synchronizer } from '../synchronizer/index.js';
 
+
 /**
  * A Private eXecution Environment (PXE) implementation.
  */
 export class PXEService implements PXE {
-  private synchronizer: Synchronizer;
+  public synchronizer: Synchronizer;
   private contractDataOracle: ContractDataOracle;
   private simulator: AcirSimulator;
   private log: DebugLogger;

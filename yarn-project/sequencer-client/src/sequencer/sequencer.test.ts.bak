@@ -1,26 +1,7 @@
-import {
-  L1ToL2MessageSource,
-  L2Block,
-  L2BlockSource,
-  MerkleTreeId,
-  PROVING_STATUS,
-  ProverClient,
-  ProvingSuccess,
-  ProvingTicket,
-  makeEmptyProcessedTx,
-  makeProcessedTx,
-  mockTx,
-} from '@aztec/circuit-types';
-import {
-  AztecAddress,
-  EthAddress,
-  Fr,
-  GlobalVariables,
-  Header,
-  NUMBER_OF_L1_L2_MESSAGES_PER_ROLLUP,
-  makeEmptyProof,
-} from '@aztec/circuits.js';
+import { L1ToL2MessageSource, L2Block, L2BlockSource, MerkleTreeId, PROVING_STATUS, ProverClient, ProvingSuccess, ProvingTicket, makeEmptyProcessedTx, makeProcessedTx, mockTx } from '@aztec/circuit-types';
+import { AztecAddress, EthAddress, Fr, GlobalVariables, Header, NUMBER_OF_L1_L2_MESSAGES_PER_ROLLUP, makeEmptyProof } from '@aztec/circuits.js';
 import { P2P, P2PClientState } from '@aztec/p2p';
+import { Synchronizer } from '@aztec/pxe';
 import { ContractDataSource } from '@aztec/types/contracts';
 import { MerkleTreeOperations, WorldStateRunningState, WorldStateSynchronizer } from '@aztec/world-state';
 
@@ -94,7 +75,10 @@ describe('sequencer', () => {
       getContractClass: mockFn().mockResolvedValue(fpcClassId),
     });
 
+    const sync = new Synchronizer();
+
     sequencer = new TestSubject(
+      sync,
       publisher,
       globalVariableBuilder,
       p2p,

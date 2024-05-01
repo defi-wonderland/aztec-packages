@@ -33,6 +33,8 @@ import {
 import { getCanonicalGasToken } from '@aztec/protocol-contracts/gas-token';
 import { PXEServiceConfig, createPXEService, getPXEServiceConfig } from '@aztec/pxe';
 
+
+
 import { HDAccount, PrivateKeyAccount, createPublicClient, getContract, http as httpViemTransport } from 'viem';
 import { mnemonicToAccount } from 'viem/accounts';
 import { foundry } from 'viem/chains';
@@ -203,6 +205,8 @@ export async function createSandbox(config: Partial<SandboxConfig> = {}) {
 
   const node = await createAztecNode(aztecNodeConfig);
   const pxe = await createAztecPXE(node);
+
+  node.getSequencer()?.sequencer.updateSynchronizer(pxe.synchronizer);
 
   if (config.enableGas) {
     await deployCanonicalL2GasToken(

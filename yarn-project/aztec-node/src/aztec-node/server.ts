@@ -1,44 +1,6 @@
 import { ArchiveSource, Archiver, KVArchiverDataStore, createArchiverClient } from '@aztec/archiver';
-import {
-  AztecNode,
-  FromLogType,
-  GetUnencryptedLogsResponse,
-  L1ToL2MessageSource,
-  L2Block,
-  L2BlockL2Logs,
-  L2BlockNumber,
-  L2BlockSource,
-  L2LogsSource,
-  LogFilter,
-  LogType,
-  MerkleTreeId,
-  NullifierMembershipWitness,
-  ProverClient,
-  PublicDataWitness,
-  SequencerConfig,
-  SiblingPath,
-  Tx,
-  TxEffect,
-  TxHash,
-  TxReceipt,
-  TxStatus,
-  partitionReverts,
-} from '@aztec/circuit-types';
-import {
-  ARCHIVE_HEIGHT,
-  EthAddress,
-  Fr,
-  Header,
-  INITIAL_L2_BLOCK_NUM,
-  L1_TO_L2_MSG_TREE_HEIGHT,
-  L2_TO_L1_MESSAGE_LENGTH,
-  NOTE_HASH_TREE_HEIGHT,
-  NULLIFIER_TREE_HEIGHT,
-  NUMBER_OF_L1_L2_MESSAGES_PER_ROLLUP,
-  NullifierLeafPreimage,
-  PUBLIC_DATA_TREE_HEIGHT,
-  PublicDataTreeLeafPreimage,
-} from '@aztec/circuits.js';
+import { AztecNode, FromLogType, GetUnencryptedLogsResponse, L1ToL2MessageSource, L2Block, L2BlockL2Logs, L2BlockNumber, L2BlockSource, L2LogsSource, LogFilter, LogType, MerkleTreeId, NullifierMembershipWitness, ProverClient, PublicDataWitness, SequencerConfig, SiblingPath, Tx, TxEffect, TxHash, TxReceipt, TxStatus, partitionReverts } from '@aztec/circuit-types';
+import { ARCHIVE_HEIGHT, EthAddress, Fr, Header, INITIAL_L2_BLOCK_NUM, L1_TO_L2_MSG_TREE_HEIGHT, L2_TO_L1_MESSAGE_LENGTH, NOTE_HASH_TREE_HEIGHT, NULLIFIER_TREE_HEIGHT, NUMBER_OF_L1_L2_MESSAGES_PER_ROLLUP, NullifierLeafPreimage, PUBLIC_DATA_TREE_HEIGHT, PublicDataTreeLeafPreimage } from '@aztec/circuits.js';
 import { computePublicDataTreeLeafSlot } from '@aztec/circuits.js/hash';
 import { L1ContractAddresses, createEthereumChain } from '@aztec/ethereum';
 import { AztecAddress } from '@aztec/foundation/aztec-address';
@@ -49,24 +11,17 @@ import { initStoreForRollup, openTmpStore } from '@aztec/kv-store/utils';
 import { SHA256Trunc, StandardTree } from '@aztec/merkle-tree';
 import { AztecKVTxPool, P2P, createP2PClient } from '@aztec/p2p';
 import { DummyProver, TxProver } from '@aztec/prover-client';
-import {
-  GlobalVariableBuilder,
-  PublicProcessorFactory,
-  SequencerClient,
-  getGlobalVariableBuilder,
-} from '@aztec/sequencer-client';
+import { Synchronizer } from '@aztec/pxe';
+import { GlobalVariableBuilder, PublicProcessorFactory, SequencerClient, getGlobalVariableBuilder } from '@aztec/sequencer-client';
 import { WASMSimulator } from '@aztec/simulator';
 import { ContractClassPublic, ContractDataSource, ContractInstanceWithAddress } from '@aztec/types/contracts';
-import {
-  MerkleTrees,
-  ServerWorldStateSynchronizer,
-  WorldStateConfig,
-  WorldStateSynchronizer,
-  getConfigEnvVars as getWorldStateConfig,
-} from '@aztec/world-state';
+import { MerkleTrees, ServerWorldStateSynchronizer, WorldStateConfig, WorldStateSynchronizer, getConfigEnvVars as getWorldStateConfig } from '@aztec/world-state';
+
+
 
 import { AztecNodeConfig } from './config.js';
 import { getSimulationProvider } from './simulator-factory.js';
+
 
 /**
  * The aztec node.
@@ -152,18 +107,16 @@ export class AztecNodeService implements AztecNode {
       : await TxProver.new(config, worldStateSynchronizer, simulationProvider);
 
     // now create the sequencer
-    const sequencer = config.disableSequencer
-      ? undefined
-      : await SequencerClient.new(
-          config,
-          p2pClient,
-          worldStateSynchronizer,
-          archiver,
-          archiver,
-          archiver,
-          prover,
-          simulationProvider,
-        );
+    const sequencer = await SequencerClient.new(
+      config,
+      p2pClient,
+      worldStateSynchronizer,
+      archiver,
+      archiver,
+      archiver,
+      prover,
+      simulationProvider,
+    );
 
     return new AztecNodeService(
       config,
@@ -190,6 +143,10 @@ export class AztecNodeService implements AztecNode {
    */
   public getSequencer(): SequencerClient | undefined {
     return this.sequencer;
+  }
+
+  public updateSynchronizer(synchronizer: Synchronizer) {
+    this.sequencer?.sequencer.updateSynchronizer(synchronizer);
   }
 
   /**

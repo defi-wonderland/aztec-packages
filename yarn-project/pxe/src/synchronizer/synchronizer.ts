@@ -1,4 +1,12 @@
-import { AztecNode, KeyStore, L2BlockContext, L2BlockL2Logs, MerkleTreeId, TxHash } from '@aztec/circuit-types';
+import {
+  AztecNode,
+  KeyStore,
+  L2Block,
+  L2BlockContext,
+  L2BlockL2Logs,
+  MerkleTreeId,
+  TxHash,
+} from '@aztec/circuit-types';
 import { NoteProcessorCaughtUpStats } from '@aztec/circuit-types/stats';
 import { AztecAddress, Fr, INITIAL_L2_BLOCK_NUM, PublicKey } from '@aztec/circuits.js';
 import { SerialQueue } from '@aztec/foundation/fifo';
@@ -115,6 +123,30 @@ export class Synchronizer {
       return true;
     } catch (err) {
       this.log.error(`Error in synchronizer work`, err);
+      return false;
+    }
+  }
+
+  async addBlock(blocks: L2Block[]) {
+    const from = this.getSynchedBlockNumber() + 1;
+    try {
+      const encryptedLogs = blocks.flatMap(block => block.body.encryptedLogs);
+
+      // Wrap blocks in block contexts & only keep those that match our query
+      const blockContexts = blocks.filter(block => block.number >= from).map(block => new L2BlockContext(block));
+
+      // Update latest tree roots from the most recent block
+      const latestBlock = blockContexts[blockContexts.length - 1];
+      await this.setHeaderFromBlock(latestBlock);
+
+      const logCount = L2BlockL2Logs.getTotalLogCount(encryptedLogs);
+      this.log(`Force adding ${logCount} encrypted logs and blocks to ${this.noteProcessors.length} note processors`);
+      for (const noteProcessor of this.noteProcessors) {
+        await noteProcessor.process(blockContexts, encryptedLogs);
+      }
+      return true;
+    } catch (err) {
+      this.log.error(`Error in synchronizer work: force add blocks`, err);
       return false;
     }
   }

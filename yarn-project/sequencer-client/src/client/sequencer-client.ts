@@ -5,6 +5,8 @@ import { SimulationProvider } from '@aztec/simulator';
 import { ContractDataSource } from '@aztec/types/contracts';
 import { WorldStateSynchronizer } from '@aztec/world-state';
 
+
+
 import { SequencerClientConfig } from '../config.js';
 import { getGlobalVariableBuilder } from '../global_variable_builder/index.js';
 import { getL1Publisher } from '../publisher/index.js';
@@ -12,11 +14,12 @@ import { Sequencer, SequencerConfig } from '../sequencer/index.js';
 import { PublicProcessorFactory } from '../sequencer/public_processor.js';
 import { TxValidatorFactory } from '../sequencer/tx_validator_factory.js';
 
+
 /**
  * Encapsulates the full sequencer and publisher.
  */
 export class SequencerClient {
-  constructor(private sequencer: Sequencer) {}
+  constructor(public sequencer: Sequencer) {}
 
   /**
    * Initializes and starts a new instance.
