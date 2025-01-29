@@ -617,15 +617,7 @@ contract Token {
 
         // 2. Deduct the max fee from user's balance. The difference between max fee and the actual tx fee will
         // be refunded to the user in the `complete_refund(...)` function.
-        let change = subtract_balance(
-            &mut context,
-            storage,
-            user,
-            max_fee,
-            INITIAL_TRANSFER_CALL_MAX_NOTES,
-        );
-        // Emit the change note.
-        storage.balances.at(user).add(user, change).emit(encode_and_encrypt_note_unconstrained(
+        storage.balances.at(user).sub(user, max_fee).emit(encode_and_encrypt_note_unconstrained(
             &mut context,
             user,
             user,
