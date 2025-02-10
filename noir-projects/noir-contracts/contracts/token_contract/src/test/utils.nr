@@ -1,12 +1,11 @@
 use crate::Token;
-use dep::uint_note::uint_note::UintNote;
 use aztec::{
     oracle::{
         execution::{get_block_number, get_contract_address},
         random::random,
         storage::storage_read,
     },
-    prelude::{AztecAddress, NoteHeader},
+    prelude::AztecAddress,
     protocol_types::storage::map::derive_storage_slot_in_map,
     test::helpers::{cheatcodes, test_environment::TestEnvironment},
 };
@@ -165,29 +164,4 @@ pub unconstrained fn get_private_balance(
     let amt = Token::balance_of_private(address);
     cheatcodes::set_contract_address(current_contract_address);
     amt
-}
-
-// This is used if we need to add a token note manually, in the case where the note is not emitted in logs.
-pub unconstrained fn add_token_note(
-    env: &mut TestEnvironment,
-    token_contract_address: AztecAddress,
-    owner: AztecAddress,
-    amount: U128,
-    note_randomness: Field,
-) {
-    // docs:start:txe_test_add_note
-    let balances_owner_slot =
-        derive_storage_slot_in_map(Token::storage_layout().balances.slot, owner);
-
-    env.add_note(
-        &mut UintNote {
-            value: amount,
-            owner: owner,
-            randomness: note_randomness,
-            header: NoteHeader::empty(),
-        },
-        balances_owner_slot,
-        token_contract_address,
-    );
-    // docs:end:txe_test_add_note
 }
